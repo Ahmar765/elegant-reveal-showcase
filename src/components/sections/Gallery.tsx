@@ -1,0 +1,147 @@
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ProductViewer } from "../three/Scenes";
+
+const products = [
+  { id: "chair", name: "Aurelia Lounge", category: "Seating", price: "€ 8,400", kind: "chair", year: "MMXXVI" },
+  { id: "sofa", name: "Belluno Divano", category: "Sofa", price: "€ 24,900", kind: "sofa", year: "MMXXVI" },
+  { id: "table", name: "Carrara Orbis", category: "Table", price: "€ 12,200", kind: "table", year: "MMXXV" },
+  { id: "lamp", name: "Sole d'Oro", category: "Lighting", price: "€ 4,750", kind: "lamp", year: "MMXXVI" },
+];
+
+export function Gallery() {
+  const [hovered, setHovered] = useState<string | null>(null);
+  const [open, setOpen] = useState<typeof products[0] | null>(null);
+
+  return (
+    <section id="atelier" className="relative py-32 px-8">
+      <div className="mx-auto max-w-[1400px]">
+        {/* Header */}
+        <div className="flex items-end justify-between gap-8 mb-20 flex-wrap">
+          <div>
+            <div className="flex items-center gap-3 text-[11px] tracking-[0.35em] uppercase text-gold/80 mb-6">
+              <span className="w-8 h-px bg-gold/60" />
+              Signature pieces
+            </div>
+            <h2 className="font-serif text-[clamp(2.5rem,5vw,4.5rem)] leading-[1] tracking-tight text-ivory max-w-2xl">
+              The <span className="italic text-gradient-gold">Atelier</span> Selection.
+            </h2>
+          </div>
+          <p className="max-w-sm text-ivory/60 font-light leading-relaxed">
+            Each piece is composed by a single master craftsman, signed and numbered. Hover to bring it to light.
+          </p>
+        </div>
+
+        {/* Product grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {products.map((p, i) => (
+            <motion.button
+              type="button"
+              key={p.id}
+              onClick={() => setOpen(p)}
+              onMouseEnter={() => setHovered(p.id)}
+              onMouseLeave={() => setHovered(null)}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 1, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+              className="group relative text-left lift-on-hover"
+            >
+              {/* Card */}
+              <div className="relative h-[420px] glass-panel rounded-sm overflow-hidden">
+                {/* 3D viewer */}
+                <div className="absolute inset-0">
+                  <ProductViewer kind={p.kind} hovered={hovered === p.id} />
+                </div>
+
+                {/* Gold reflection underneath on hover */}
+                <div
+                  className="pointer-events-none absolute -bottom-12 left-1/2 -translate-x-1/2 w-3/4 h-24 rounded-full opacity-0 group-hover:opacity-70 transition-opacity duration-700"
+                  style={{
+                    background: "radial-gradient(ellipse, hsl(38 60% 60% / 0.5), transparent 70%)",
+                    filter: "blur(20px)",
+                  }}
+                />
+
+                {/* Top corner index */}
+                <div className="absolute top-5 left-5 text-[10px] tracking-[0.3em] uppercase text-ivory/50">
+                  N° 0{i + 1}
+                </div>
+                <div className="absolute top-5 right-5 text-[10px] tracking-[0.3em] uppercase text-gold/70">
+                  {p.year}
+                </div>
+              </div>
+
+              {/* Below card meta */}
+              <div className="pt-6 flex items-end justify-between">
+                <div>
+                  <div className="text-[10px] tracking-[0.3em] uppercase text-ivory/50 mb-2">{p.category}</div>
+                  <div className="font-serif text-2xl text-ivory group-hover:text-gold transition-colors duration-700">
+                    {p.name}
+                  </div>
+                </div>
+                <div className="text-sm text-ivory/70 font-light">{p.price}</div>
+              </div>
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
+      {/* Floating modal */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-onyx/85 backdrop-blur-md"
+            onClick={() => setOpen(null)}
+          >
+            <motion.div
+              initial={{ y: 40, opacity: 0, scale: 0.97 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: 40, opacity: 0, scale: 0.97 }}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-5xl glass-panel rounded-sm overflow-hidden grid md:grid-cols-2"
+            >
+              <div className="h-[480px] relative">
+                <ProductViewer kind={open.kind} hovered={true} />
+              </div>
+              <div className="p-12 flex flex-col justify-between">
+                <div>
+                  <div className="text-[10px] tracking-[0.3em] uppercase text-gold mb-4">{open.category} · {open.year}</div>
+                  <h3 className="font-serif text-5xl text-ivory mb-6">{open.name}</h3>
+                  <p className="text-ivory/65 leading-relaxed font-light">
+                    Hand-stitched in our Milanese atelier across 84 hours. The {open.name.toLowerCase()} explores the
+                    silent dialogue between brushed brass, Tuscan leather and quiet geometry.
+                  </p>
+                  <div className="hairline mt-8 mb-8 opacity-50" />
+                  <dl className="grid grid-cols-2 gap-y-3 text-sm">
+                    <dt className="text-ivory/50 uppercase tracking-widest text-[10px]">Materials</dt>
+                    <dd className="text-ivory/85">Italian leather · Brass</dd>
+                    <dt className="text-ivory/50 uppercase tracking-widest text-[10px]">Lead time</dt>
+                    <dd className="text-ivory/85">10 — 12 weeks</dd>
+                    <dt className="text-ivory/50 uppercase tracking-widest text-[10px]">Edition</dt>
+                    <dd className="text-ivory/85">Numbered, /99</dd>
+                  </dl>
+                </div>
+                <div className="mt-8 flex items-center justify-between gap-4">
+                  <div className="font-serif text-3xl text-ivory">{open.price}</div>
+                  <button onClick={() => setOpen(null)} className="btn-gold">Request Piece</button>
+                </div>
+              </div>
+              <button
+                onClick={() => setOpen(null)}
+                className="absolute top-5 right-5 w-9 h-9 rounded-full border border-ivory/20 text-ivory/70 hover:text-gold hover:border-gold transition-colors duration-500"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
+  );
+}
