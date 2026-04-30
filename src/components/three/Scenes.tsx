@@ -315,46 +315,44 @@ export function ProductViewer({ kind, hovered }: { kind: string; hovered: boolea
 }
 
 /* -------- Configurator chair (color/material reactive) -------- */
-export function ConfigChair({
-  color,
-  legColor,
-  scale,
-}: {
-  color: string;
-  legColor: string;
-  scale: number;
-}) {
+function ConfigChairMesh({ color, legColor, scale }: { color: string; legColor: string; scale: number }) {
   const ref = useRef<THREE.Group>(null);
   useFrame((_, delta) => {
     if (!ref.current) return;
     ref.current.rotation.y += delta * 0.35;
   });
   return (
+    <group ref={ref} scale={scale}>
+      <mesh position={[0, 0.3, 0]} castShadow>
+        <boxGeometry args={[0.95, 0.22, 0.95]} />
+        <meshPhysicalMaterial color={color} roughness={0.55} clearcoat={0.5} sheen={0.6} sheenColor="#c9a064" />
+      </mesh>
+      <mesh position={[0, 0.85, -0.42]} rotation={[-0.18, 0, 0]} castShadow>
+        <boxGeometry args={[0.95, 1.0, 0.16]} />
+        <meshPhysicalMaterial color={color} roughness={0.55} clearcoat={0.5} sheen={0.6} sheenColor="#c9a064" />
+      </mesh>
+      {[
+        [-0.42, -0.05, 0.42],
+        [0.42, -0.05, 0.42],
+        [-0.42, -0.05, -0.42],
+        [0.42, -0.05, -0.42],
+      ].map((p, i) => (
+        <mesh key={i} position={p as [number, number, number]} castShadow>
+          <cylinderGeometry args={[0.04, 0.03, 0.7, 16]} />
+          <meshPhysicalMaterial color={legColor} metalness={1} roughness={0.3} clearcoat={0.8} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+export function ConfigChair({ color, legColor, scale }: { color: string; legColor: string; scale: number }) {
+  return (
     <Canvas dpr={[1, 2]} camera={{ position: [2.6, 1.6, 2.6], fov: 35 }} shadows>
       <ambientLight intensity={0.35} color="#fff1d6" />
       <spotLight position={[3, 5, 3]} intensity={1.8} angle={0.6} penumbra={1} color="#f0d9a8" castShadow />
       <directionalLight position={[-3, 2, -2]} intensity={0.4} color="#c9a064" />
-      <group ref={ref} scale={scale}>
-        <mesh position={[0, 0.3, 0]} castShadow>
-          <boxGeometry args={[0.95, 0.22, 0.95]} />
-          <meshPhysicalMaterial color={color} roughness={0.55} clearcoat={0.5} sheen={0.6} sheenColor="#c9a064" />
-        </mesh>
-        <mesh position={[0, 0.85, -0.42]} rotation={[-0.18, 0, 0]} castShadow>
-          <boxGeometry args={[0.95, 1.0, 0.16]} />
-          <meshPhysicalMaterial color={color} roughness={0.55} clearcoat={0.5} sheen={0.6} sheenColor="#c9a064" />
-        </mesh>
-        {[
-          [-0.42, -0.05, 0.42],
-          [0.42, -0.05, 0.42],
-          [-0.42, -0.05, -0.42],
-          [0.42, -0.05, -0.42],
-        ].map((p, i) => (
-          <mesh key={i} position={p as [number, number, number]} castShadow>
-            <cylinderGeometry args={[0.04, 0.03, 0.7, 16]} />
-            <meshPhysicalMaterial color={legColor} metalness={1} roughness={0.3} clearcoat={0.8} />
-          </mesh>
-        ))}
-      </group>
+      <ConfigChairMesh color={color} legColor={legColor} scale={scale} />
       <ContactShadows position={[0, -0.45, 0]} opacity={0.6} scale={5} blur={2.4} far={2} color="#000" />
       <Environment preset="apartment" />
     </Canvas>
@@ -362,31 +360,36 @@ export function ConfigChair({
 }
 
 /* -------- Material orb (for craftsmanship cards) -------- */
-export function MaterialOrb({ kind }: { kind: "leather" | "walnut" | "marble" | "metal" }) {
+function MaterialOrbMesh({ kind }: { kind: "leather" | "walnut" | "marble" | "metal" }) {
   const ref = useRef<THREE.Mesh>(null);
   useFrame((_, delta) => {
     if (ref.current) ref.current.rotation.y += delta * 0.4;
   });
   return (
+    <mesh ref={ref}>
+      <sphereGeometry args={[1, 64, 64]} />
+      {kind === "leather" && (
+        <meshPhysicalMaterial color="#3a2418" roughness={0.6} clearcoat={0.4} sheen={0.7} sheenColor="#c9a064" />
+      )}
+      {kind === "walnut" && <meshPhysicalMaterial color="#3d2716" roughness={0.45} clearcoat={0.6} />}
+      {kind === "marble" && (
+        <meshPhysicalMaterial color="#ece4d3" roughness={0.15} clearcoat={1} metalness={0.05} />
+      )}
+      {kind === "metal" && (
+        <meshPhysicalMaterial color="#c9a064" roughness={0.2} metalness={1} clearcoat={0.9} />
+      )}
+    </mesh>
+  );
+}
+
+export function MaterialOrb({ kind }: { kind: "leather" | "walnut" | "marble" | "metal" }) {
+  return (
     <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 3], fov: 35 }} gl={{ alpha: true }}>
       <ambientLight intensity={0.4} />
       <spotLight position={[3, 4, 3]} intensity={1.6} angle={0.6} penumbra={1} color="#f0d9a8" />
-      <mesh ref={ref}>
-        <sphereGeometry args={[1, 64, 64]} />
-        {kind === "leather" && (
-          <meshPhysicalMaterial color="#3a2418" roughness={0.6} clearcoat={0.4} sheen={0.7} sheenColor="#c9a064" />
-        )}
-        {kind === "walnut" && (
-          <meshPhysicalMaterial color="#3d2716" roughness={0.45} clearcoat={0.6} />
-        )}
-        {kind === "marble" && (
-          <meshPhysicalMaterial color="#ece4d3" roughness={0.15} clearcoat={1} metalness={0.05} />
-        )}
-        {kind === "metal" && (
-          <meshPhysicalMaterial color="#c9a064" roughness={0.2} metalness={1} clearcoat={0.9} />
-        )}
-      </mesh>
+      <MaterialOrbMesh kind={kind} />
       <Environment preset="apartment" />
     </Canvas>
   );
 }
+
