@@ -1,9 +1,15 @@
 import { motion } from "framer-motion";
 
-export function FinalCTA() {
+interface FinalCTAProps {
+  onConsult: () => void;
+}
+
+export function FinalCTA({ onConsult }: FinalCTAProps) {
+  const goCollection = () =>
+    document.getElementById("atelier")?.scrollIntoView({ behavior: "smooth" });
+
   return (
     <section id="contact" className="relative py-40 px-8 overflow-hidden">
-      {/* Glow */}
       <div
         aria-hidden
         className="absolute inset-0 -z-10"
@@ -33,8 +39,8 @@ export function FinalCTA() {
           </p>
 
           <div className="mt-12 flex flex-wrap items-center justify-center gap-5">
-            <a href="#collection" className="btn-gold">View Collection</a>
-            <a href="#contact" className="btn-ghost-luxury">Book Consultation</a>
+            <button onClick={goCollection} className="btn-gold">View Collection</button>
+            <button onClick={onConsult} className="btn-ghost-luxury">Book Consultation</button>
           </div>
         </motion.div>
       </div>
@@ -42,7 +48,7 @@ export function FinalCTA() {
   );
 }
 
-export function Footer() {
+export function Footer({ onConsult }: { onConsult: () => void }) {
   return (
     <footer className="border-t border-ivory/10 px-8 py-12">
       <div className="mx-auto max-w-[1400px] flex flex-wrap items-center justify-between gap-6">
@@ -54,9 +60,23 @@ export function Footer() {
           Via della Spiga 14 · 20121 Milano · Italia
         </div>
         <div className="flex gap-6 text-[10px] tracking-[0.3em] uppercase text-ivory/50">
-          <a href="#" className="hover:text-gold transition-colors duration-500">Instagram</a>
-          <a href="#" className="hover:text-gold transition-colors duration-500">Pinterest</a>
-          <a href="#" className="hover:text-gold transition-colors duration-500">Journal</a>
+          <button onClick={onConsult} className="hover:text-gold transition-colors duration-500">Contact</button>
+          <a
+            href="https://instagram.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-gold transition-colors duration-500"
+          >
+            Instagram
+          </a>
+          <a
+            href="https://pinterest.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-gold transition-colors duration-500"
+          >
+            Pinterest
+          </a>
         </div>
       </div>
       <div className="mx-auto max-w-[1400px] mt-8 text-center text-[10px] tracking-[0.3em] uppercase text-ivory/30">

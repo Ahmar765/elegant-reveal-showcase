@@ -1,16 +1,55 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { HeroScene } from "../three/Scenes";
+import heroChair from "@/assets/hero-chair.jpg";
 
-export function Hero() {
-  const mouse = useRef({ x: 0, y: 0 });
+interface HeroProps {
+  onOpenConsult: () => void;
+}
+
+export function Hero({ onOpenConsult }: HeroProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const spotRef = useRef<HTMLDivElement>(null);
+  const [auto, setAuto] = useState(0);
+
+  // Slow auto-rotation that mouse can override
+  useEffect(() => {
+    let raf = 0;
+    let t = 0;
+    const tick = () => {
+      t += 0.004;
+      setAuto(Math.sin(t) * 6); // -6deg → +6deg
+      raf = requestAnimationFrame(tick);
+    };
+    tick();
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
   const onMove = (e: React.MouseEvent) => {
     const r = wrapRef.current?.getBoundingClientRect();
     if (!r) return;
-    mouse.current.x = ((e.clientX - r.left) / r.width) * 2 - 1;
-    mouse.current.y = -(((e.clientY - r.top) / r.height) * 2 - 1);
+    const mx = ((e.clientX - r.left) / r.width) * 2 - 1; // -1..1
+    const my = ((e.clientY - r.top) / r.height) * 2 - 1;
+    if (imgRef.current) {
+      imgRef.current.style.transform = `perspective(1400px) rotateY(${
+        auto + mx * 8
+      }deg) rotateX(${-my * 5}deg) translateZ(0)`;
+    }
+    if (spotRef.current) {
+      spotRef.current.style.background = `radial-gradient(500px circle at ${e.clientX - r.left}px ${
+        e.clientY - r.top
+      }px, hsl(38 70% 70% / 0.28), transparent 60%)`;
+    }
+  };
+
+  const onLeave = () => {
+    if (imgRef.current) {
+      imgRef.current.style.transform = `perspective(1400px) rotateY(${auto}deg) rotateX(0deg)`;
+    }
+  };
+
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
@@ -18,11 +57,68 @@ export function Hero() {
       id="collection"
       ref={wrapRef}
       onMouseMove={onMove}
-      className="relative min-h-screen w-full overflow-hidden"
+      onMouseLeave={onLeave}
+      className="relative min-h-screen w-full overflow-hidden bg-onyx"
     >
-      {/* 3D Canvas backdrop */}
-      <div className="absolute inset-0">
-        <HeroScene mouse={mouse} />
+      {/* Backdrop gradient */}
+      <div
+        aria-hidden
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse at 70% 30%, hsl(38 40% 18% / 0.6), transparent 60%), radial-gradient(ellipse at 20% 90%, hsl(30 8% 4%), hsl(30 10% 6%))",
+        }}
+      />
+
+      {/* Floating dust */}
+      <div aria-hidden className="absolute inset-0 overflow-hidden pointer-events-none">
+        {Array.from({ length: 28 }).map((_, i) => (
+          <span
+            key={i}
+            className="absolute w-1 h-1 rounded-full bg-gold/40"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animation: `drift ${10 + Math.random() * 14}s linear ${Math.random() * 8}s infinite`,
+              ["--dx" as any]: `${(Math.random() - 0.5) * 80}px`,
+              ["--dy" as any]: `${-80 - Math.random() * 200}px`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Cursor spotlight overlay (local) */}
+      <div
+        ref={spotRef}
+        aria-hidden
+        className="pointer-events-none absolute inset-0 mix-blend-screen transition-[background] duration-300"
+      />
+
+      {/* Center hero chair image */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="relative w-[min(720px,75vw)] aspect-square">
+          {/* Glow under chair */}
+          <div
+            aria-hidden
+            className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-3/4 h-32 rounded-full"
+            style={{
+              background: "radial-gradient(ellipse, hsl(38 60% 55% / 0.45), transparent 70%)",
+              filter: "blur(30px)",
+            }}
+          />
+          <img
+            ref={imgRef}
+            src={heroChair}
+            alt="Aurelia luxury lounge chair in oxblood Italian leather"
+            width={1024}
+            height={1024}
+            className="relative w-full h-full object-contain animate-fade-in-soft will-change-transform"
+            style={{
+              transition: "transform 0.9s cubic-bezier(0.16,1,0.3,1)",
+              filter: "drop-shadow(0 60px 80px rgba(0,0,0,0.7))",
+            }}
+          />
+        </div>
       </div>
 
       {/* Vignette */}
@@ -30,7 +126,6 @@ export function Hero() {
 
       {/* Foreground content */}
       <div className="relative z-10 mx-auto max-w-[1400px] px-8 pt-40 pb-24 min-h-screen flex flex-col justify-between">
-        {/* Top label */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -41,8 +136,7 @@ export function Hero() {
           The 2026 Atelier Collection
         </motion.div>
 
-        {/* Headline */}
-        <div className="max-w-3xl">
+        <div className="max-w-2xl">
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -69,28 +163,25 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.2, delay: 1.15, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-10 flex flex-wrap items-center gap-5"
+            className="mt-10 flex flex-wrap items-center gap-5 pointer-events-auto"
           >
-            <a href="#showroom" className="btn-gold">
+            <button onClick={() => scrollTo("atelier")} className="btn-gold">
               Explore Collection
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>
-            </a>
-            <a href="#atelier" className="btn-ghost-luxury">Visit the Atelier</a>
+            </button>
+            <button onClick={onOpenConsult} className="btn-ghost-luxury">Visit the Atelier</button>
           </motion.div>
         </div>
 
-        {/* Bottom row */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.4, delay: 1.5 }}
           className="flex items-end justify-between gap-8 text-ivory/60"
         >
-          <div className="text-[10px] tracking-[0.4em] uppercase">
-            Est. Milano · 1962
-          </div>
+          <div className="text-[10px] tracking-[0.4em] uppercase">Est. Milano · 1962</div>
           <div className="hidden md:flex items-center gap-12 text-xs tracking-widest">
             <div className="flex flex-col gap-1">
               <span className="font-serif text-3xl text-ivory">62</span>
@@ -106,7 +197,7 @@ export function Hero() {
             </div>
           </div>
           <div className="text-[10px] tracking-[0.4em] uppercase animate-float-soft">
-            ↓ Drag · Hover · Discover
+            ↓ Hover · Discover
           </div>
         </motion.div>
       </div>
