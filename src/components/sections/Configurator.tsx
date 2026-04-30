@@ -1,12 +1,15 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { ConfigChair } from "../three/Scenes";
+import { motion, AnimatePresence } from "framer-motion";
+import oxblood from "@/assets/chair-oxblood.jpg";
+import cognac from "@/assets/chair-cognac.jpg";
+import ivory from "@/assets/chair-ivory.jpg";
+import midnight from "@/assets/chair-midnight.jpg";
 
 const colors = [
-  { id: "oxblood", label: "Oxblood", hex: "#3a1418" },
-  { id: "cognac", label: "Cognac", hex: "#7a4a2a" },
-  { id: "ivory", label: "Ivory", hex: "#e8d9bd" },
-  { id: "midnight", label: "Midnight", hex: "#15181f" },
+  { id: "oxblood", label: "Oxblood", hex: "#3a1418", img: oxblood },
+  { id: "cognac", label: "Cognac", hex: "#7a4a2a", img: cognac },
+  { id: "ivory", label: "Ivory", hex: "#e8d9bd", img: ivory },
+  { id: "midnight", label: "Midnight", hex: "#15181f", img: midnight },
 ];
 const legs = [
   { id: "brass", label: "Brushed Brass", hex: "#c9a064" },
@@ -16,10 +19,14 @@ const legs = [
 const sizes = [
   { id: "petite", label: "Petite", scale: 0.85 },
   { id: "signature", label: "Signature", scale: 1 },
-  { id: "grand", label: "Grand", scale: 1.15 },
+  { id: "grand", label: "Grand", scale: 1.12 },
 ];
 
-export function Configurator() {
+interface ConfiguratorProps {
+  onReserve: (summary: string) => void;
+}
+
+export function Configurator({ onReserve }: ConfiguratorProps) {
   const [color, setColor] = useState(colors[0]);
   const [leg, setLeg] = useState(legs[0]);
   const [size, setSize] = useState(sizes[1]);
@@ -39,22 +46,50 @@ export function Configurator() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-          {/* 3D viewport */}
+          {/* Image viewport */}
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 1.2 }}
-            className="lg:col-span-7 h-[600px] glass-panel rounded-sm relative overflow-hidden"
+            className="lg:col-span-7 h-[600px] glass-panel rounded-sm relative overflow-hidden flex items-center justify-center"
           >
-            <ConfigChair color={color.hex} legColor={leg.hex} scale={size.scale} />
-            {/* corner badge */}
-            <div className="absolute top-6 left-6 text-[10px] tracking-[0.3em] uppercase text-ivory/50">
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={color.id}
+                src={color.img}
+                alt={`Aurelia chair in ${color.label}`}
+                width={1024}
+                height={1024}
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.02 }}
+                transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                className="max-w-[80%] max-h-[90%] object-contain"
+                style={{
+                  transform: `scale(${size.scale})`,
+                  transition: "transform 0.9s cubic-bezier(0.16,1,0.3,1)",
+                  filter: `drop-shadow(0 50px 60px rgba(0,0,0,0.6)) ${
+                    leg.id === "blackened" ? "hue-rotate(-15deg) saturate(0.85)" : leg.id === "silver" ? "hue-rotate(180deg) saturate(0.4) brightness(1.05)" : ""
+                  }`,
+                }}
+              />
+            </AnimatePresence>
+
+            <div className="absolute top-6 left-6 text-[10px] tracking-[0.3em] uppercase text-ivory/60">
               Aurelia · {size.label}
             </div>
-            <div className="absolute bottom-6 right-6 text-[10px] tracking-[0.3em] uppercase text-gold/70">
+            <div className="absolute bottom-6 right-6 text-[10px] tracking-[0.3em] uppercase text-gold/80">
               Live preview
             </div>
+            <div
+              aria-hidden
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  "radial-gradient(600px circle at 70% 25%, hsl(38 60% 65% / 0.18), transparent 60%)",
+              }}
+            />
           </motion.div>
 
           {/* Controls */}
@@ -100,7 +135,14 @@ export function Configurator() {
                 <div className="text-[10px] tracking-[0.3em] uppercase text-ivory/50 mb-1">From</div>
                 <div className="font-serif text-3xl text-ivory">€ {(8400 * size.scale).toFixed(0)}</div>
               </div>
-              <button className="btn-gold">Reserve Yours</button>
+              <button
+                onClick={() =>
+                  onReserve(`Aurelia · ${color.label} leather · ${leg.label} legs · ${size.label}`)
+                }
+                className="btn-gold"
+              >
+                Reserve Yours
+              </button>
             </div>
           </div>
         </div>
@@ -133,7 +175,11 @@ function Swatch({ hex, label, active, onClick }: { hex: string; label: string; a
         }`}
         style={{ background: hex }}
       />
-      <span className={`text-[9px] tracking-[0.25em] uppercase transition-colors duration-500 ${active ? "text-gold" : "text-ivory/55 group-hover:text-ivory"}`}>
+      <span
+        className={`text-[9px] tracking-[0.25em] uppercase transition-colors duration-500 ${
+          active ? "text-gold" : "text-ivory/55 group-hover:text-ivory"
+        }`}
+      >
         {label}
       </span>
     </button>

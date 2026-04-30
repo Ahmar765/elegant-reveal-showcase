@@ -1,22 +1,43 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ProductViewer } from "../three/Scenes";
+import { toast } from "sonner";
+import productChair from "@/assets/product-chair.jpg";
+import productSofa from "@/assets/product-sofa.jpg";
+import productTable from "@/assets/product-table.jpg";
+import productLamp from "@/assets/product-lamp.jpg";
 
 const products = [
-  { id: "chair", name: "Aurelia Lounge", category: "Seating", price: "€ 8,400", kind: "chair", year: "MMXXVI" },
-  { id: "sofa", name: "Belluno Divano", category: "Sofa", price: "€ 24,900", kind: "sofa", year: "MMXXVI" },
-  { id: "table", name: "Carrara Orbis", category: "Table", price: "€ 12,200", kind: "table", year: "MMXXV" },
-  { id: "lamp", name: "Sole d'Oro", category: "Lighting", price: "€ 4,750", kind: "lamp", year: "MMXXVI" },
+  { id: "chair", name: "Aurelia Lounge", category: "Seating", price: "€ 8,400", img: productChair, year: "MMXXVI" },
+  { id: "sofa", name: "Belluno Divano", category: "Sofa", price: "€ 24,900", img: productSofa, year: "MMXXVI" },
+  { id: "table", name: "Carrara Orbis", category: "Table", price: "€ 12,200", img: productTable, year: "MMXXV" },
+  { id: "lamp", name: "Sole d'Oro", category: "Lighting", price: "€ 4,750", img: productLamp, year: "MMXXVI" },
 ];
 
-export function Gallery() {
+interface GalleryProps {
+  onRequest: (productName: string) => void;
+}
+
+export function Gallery({ onRequest }: GalleryProps) {
   const [hovered, setHovered] = useState<string | null>(null);
   const [open, setOpen] = useState<typeof products[0] | null>(null);
+
+  const handleTilt = (e: React.MouseEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    const mx = (e.clientX - r.left) / r.width - 0.5;
+    const my = (e.clientY - r.top) / r.height - 0.5;
+    const img = e.currentTarget.querySelector<HTMLImageElement>("[data-tilt]");
+    if (img) {
+      img.style.transform = `perspective(900px) rotateY(${mx * 14}deg) rotateX(${-my * 10}deg) translateY(-12px) scale(1.04)`;
+    }
+  };
+  const resetTilt = (e: React.MouseEvent<HTMLDivElement>) => {
+    const img = e.currentTarget.querySelector<HTMLImageElement>("[data-tilt]");
+    if (img) img.style.transform = "perspective(900px) rotateY(0) rotateX(0) translateY(0) scale(1)";
+  };
 
   return (
     <section id="atelier" className="relative py-32 px-8">
       <div className="mx-auto max-w-[1400px]">
-        {/* Header */}
         <div className="flex items-end justify-between gap-8 mb-20 flex-wrap">
           <div>
             <div className="flex items-center gap-3 text-[11px] tracking-[0.35em] uppercase text-gold/80 mb-6">
@@ -32,62 +53,78 @@ export function Gallery() {
           </p>
         </div>
 
-        {/* Product grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {products.map((p, i) => (
-            <motion.button
-              type="button"
+            <motion.div
               key={p.id}
-              onClick={() => setOpen(p)}
-              onMouseEnter={() => setHovered(p.id)}
-              onMouseLeave={() => setHovered(null)}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 1, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className="group relative text-left lift-on-hover"
+              className="group"
             >
-              {/* Card */}
-              <div className="relative h-[420px] glass-panel rounded-sm overflow-hidden">
-                {/* 3D viewer */}
-                <div className="absolute inset-0">
-                  <ProductViewer kind={p.kind} hovered={hovered === p.id} />
-                </div>
-
-                {/* Gold reflection underneath on hover */}
+              <button
+                type="button"
+                onClick={() => setOpen(p)}
+                onMouseEnter={() => setHovered(p.id)}
+                onMouseLeave={() => setHovered(null)}
+                className="block w-full text-left"
+              >
                 <div
-                  className="pointer-events-none absolute -bottom-12 left-1/2 -translate-x-1/2 w-3/4 h-24 rounded-full opacity-0 group-hover:opacity-70 transition-opacity duration-700"
-                  style={{
-                    background: "radial-gradient(ellipse, hsl(38 60% 60% / 0.5), transparent 70%)",
-                    filter: "blur(20px)",
-                  }}
-                />
+                  className="relative h-[420px] glass-panel rounded-sm overflow-hidden"
+                  onMouseMove={handleTilt}
+                  onMouseLeave={resetTilt}
+                  style={{ perspective: "1000px" }}
+                >
+                  <img
+                    data-tilt
+                    src={p.img}
+                    alt={`${p.name} — ${p.category}`}
+                    width={1024}
+                    height={1024}
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover will-change-transform"
+                    style={{ transition: "transform 0.7s cubic-bezier(0.16,1,0.3,1)" }}
+                  />
 
-                {/* Top corner index */}
-                <div className="absolute top-5 left-5 text-[10px] tracking-[0.3em] uppercase text-ivory/50">
-                  N° 0{i + 1}
-                </div>
-                <div className="absolute top-5 right-5 text-[10px] tracking-[0.3em] uppercase text-gold/70">
-                  {p.year}
-                </div>
-              </div>
+                  {/* Gold reflection underneath on hover */}
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute -bottom-12 left-1/2 -translate-x-1/2 w-3/4 h-24 rounded-full opacity-0 group-hover:opacity-80 transition-opacity duration-700"
+                    style={{
+                      background: "radial-gradient(ellipse, hsl(38 60% 60% / 0.55), transparent 70%)",
+                      filter: "blur(24px)",
+                    }}
+                  />
 
-              {/* Below card meta */}
-              <div className="pt-6 flex items-end justify-between">
-                <div>
-                  <div className="text-[10px] tracking-[0.3em] uppercase text-ivory/50 mb-2">{p.category}</div>
-                  <div className="font-serif text-2xl text-ivory group-hover:text-gold transition-colors duration-700">
-                    {p.name}
+                  <div className="absolute top-5 left-5 text-[10px] tracking-[0.3em] uppercase text-ivory/70">
+                    N° 0{i + 1}
+                  </div>
+                  <div className="absolute top-5 right-5 text-[10px] tracking-[0.3em] uppercase text-gold">
+                    {p.year}
+                  </div>
+
+                  {/* Hover quick-view chip */}
+                  <div className="absolute bottom-5 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-500 text-[10px] tracking-[0.3em] uppercase text-onyx bg-gold px-4 py-2">
+                    Quick View
                   </div>
                 </div>
-                <div className="text-sm text-ivory/70 font-light">{p.price}</div>
-              </div>
-            </motion.button>
+
+                <div className="pt-6 flex items-end justify-between">
+                  <div>
+                    <div className="text-[10px] tracking-[0.3em] uppercase text-ivory/50 mb-2">{p.category}</div>
+                    <div className="font-serif text-2xl text-ivory group-hover:text-gold transition-colors duration-700">
+                      {p.name}
+                    </div>
+                  </div>
+                  <div className="text-sm text-ivory/70 font-light">{p.price}</div>
+                </div>
+              </button>
+            </motion.div>
           ))}
         </div>
       </div>
 
-      {/* Floating modal */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -105,12 +142,14 @@ export function Gallery() {
               onClick={(e) => e.stopPropagation()}
               className="relative w-full max-w-5xl glass-panel rounded-sm overflow-hidden grid md:grid-cols-2"
             >
-              <div className="h-[480px] relative">
-                <ProductViewer kind={open.kind} hovered={true} />
+              <div className="h-[480px] relative bg-onyx">
+                <img src={open.img} alt={open.name} className="w-full h-full object-cover" />
               </div>
               <div className="p-12 flex flex-col justify-between">
                 <div>
-                  <div className="text-[10px] tracking-[0.3em] uppercase text-gold mb-4">{open.category} · {open.year}</div>
+                  <div className="text-[10px] tracking-[0.3em] uppercase text-gold mb-4">
+                    {open.category} · {open.year}
+                  </div>
                   <h3 className="font-serif text-5xl text-ivory mb-6">{open.name}</h3>
                   <p className="text-ivory/65 leading-relaxed font-light">
                     Hand-stitched in our Milanese atelier across 84 hours. The {open.name.toLowerCase()} explores the
@@ -128,7 +167,15 @@ export function Gallery() {
                 </div>
                 <div className="mt-8 flex items-center justify-between gap-4">
                   <div className="font-serif text-3xl text-ivory">{open.price}</div>
-                  <button onClick={() => setOpen(null)} className="btn-gold">Request Piece</button>
+                  <button
+                    onClick={() => {
+                      onRequest(open.name);
+                      setOpen(null);
+                    }}
+                    className="btn-gold"
+                  >
+                    Request Piece
+                  </button>
                 </div>
               </div>
               <button
