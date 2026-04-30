@@ -1,7 +1,22 @@
 import { motion } from "framer-motion";
 
-export function Navbar() {
-  const items = ["Collection", "Atelier", "Materials", "Showroom", "Journal"];
+interface NavbarProps {
+  onOpenConsult: () => void;
+}
+
+export function Navbar({ onOpenConsult }: NavbarProps) {
+  const items = [
+    { label: "Collection", id: "atelier" },
+    { label: "Materials", id: "materials" },
+    { label: "Showroom", id: "showroom" },
+    { label: "Configure", id: "configure" },
+    { label: "Journal", id: "press" },
+  ];
+
+  const goTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <motion.header
       initial={{ y: -40, opacity: 0 }}
@@ -10,27 +25,30 @@ export function Navbar() {
       className="fixed top-0 left-0 right-0 z-40"
     >
       <div className="mx-auto max-w-[1400px] px-8 py-6 flex items-center justify-between">
-        <a href="#" className="flex items-center gap-3 group">
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="flex items-center gap-3 group"
+        >
           <span className="font-serif text-2xl tracking-wide text-ivory">Maison</span>
           <span className="font-serif italic text-2xl text-gradient-gold">Lumière</span>
-        </a>
+        </button>
         <nav className="hidden md:flex items-center gap-10">
           {items.map((it) => (
-            <a
-              key={it}
-              href={`#${it.toLowerCase()}`}
+            <button
+              key={it.id}
+              onClick={() => goTo(it.id)}
               className="reveal-line text-[11px] tracking-[0.25em] uppercase text-ivory/75 hover:text-gold transition-colors duration-500"
             >
-              {it}
-            </a>
+              {it.label}
+            </button>
           ))}
         </nav>
-        <a
-          href="#contact"
+        <button
+          onClick={onOpenConsult}
           className="text-[11px] tracking-[0.25em] uppercase text-ivory/85 border border-gold/40 px-5 py-2.5 hover:bg-gold/10 hover:border-gold transition-all duration-700"
         >
           Book a Visit
-        </a>
+        </button>
       </div>
       <div className="hairline mx-8 opacity-40" />
     </motion.header>
