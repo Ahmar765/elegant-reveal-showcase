@@ -166,6 +166,10 @@
     transition: width 0.6s var(--ease-luxury);
   }
   .reveal-line:hover::after { width: 100%; }
+
+  .luxury-input {
+    @apply w-full bg-transparent border-b border-ivory/20 text-ivory py-3 text-sm font-light placeholder:text-ivory/30 focus:outline-none focus:border-gold transition-colors duration-500;
+  }
 }
 
 @keyframes float-soft {

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "sonner";
 import productChair from "@/assets/product-chair.jpg";
 import productSofa from "@/assets/product-sofa.jpg";
 import productTable from "@/assets/product-table.jpg";
