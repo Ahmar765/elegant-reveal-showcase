@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { motion } from "framer-motion";
-import { HeroScene } from "./three/Scenes";
+import { HeroScene } from "../three/Scenes";
 
 export function Hero() {
   const mouse = useRef({ x: 0, y: 0 });
