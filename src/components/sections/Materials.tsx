@@ -1,18 +1,13 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import leatherImg from "@/assets/material-leather.jpg";
-import walnutImg from "@/assets/material-walnut.jpg";
-import marbleImg from "@/assets/material-marble.jpg";
-import brassImg from "@/assets/material-brass.jpg";
+import { resolveAsset } from "@/lib/assets";
+import { MaterialsContent } from "@/lib/site-api";
 
-const materials = [
-  { id: "leather", name: "Italian Leather", origin: "Toscana, IT", note: "Vegetable-tanned across six weeks. Patinas with light.", img: leatherImg },
-  { id: "walnut", name: "Canaletto Walnut", origin: "Lombardia, IT", note: "Cut from sustainably managed forests, hand-oiled.", img: walnutImg },
-  { id: "marble", name: "Bianco Carrara", origin: "Apuan Alps, IT", note: "Quarried in single blocks. Veined & polished by hand.", img: marbleImg },
-  { id: "metal", name: "Brushed Brass", origin: "Brescia, IT", note: "Solid brass, brushed and lacquered for warmth.", img: brassImg },
-];
+interface MaterialsProps {
+  content: MaterialsContent;
+}
 
-export function Materials() {
+export function Materials({ content }: MaterialsProps) {
   const [active, setActive] = useState<string | null>(null);
 
   return (
@@ -21,16 +16,16 @@ export function Materials() {
         <div className="text-center max-w-3xl mx-auto mb-20">
           <div className="flex items-center justify-center gap-3 text-[11px] tracking-[0.35em] uppercase text-gold/80 mb-6">
             <span className="w-8 h-px bg-gold/60" />
-            Materials & craftsmanship
+            {content.eyebrow}
             <span className="w-8 h-px bg-gold/60" />
           </div>
           <h2 className="font-serif text-[clamp(2.5rem,5vw,4.5rem)] leading-[1.05] text-ivory">
-            The <span className="italic text-gradient-gold">noble matter</span> of every piece.
+            {content.title} <span className="italic text-gradient-gold">{content.accent}</span> {content.suffix}
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {materials.map((m, i) => (
+          {content.items.map((m, i) => (
             <motion.div
               key={m.id}
               initial={{ opacity: 0, y: 30 }}
@@ -50,7 +45,7 @@ export function Materials() {
                 }}
               >
                 <img
-                  src={m.img}
+                  src={resolveAsset(m.imageKey)}
                   alt={`${m.name} from ${m.origin}`}
                   width={1024}
                   height={1024}

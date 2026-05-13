@@ -1,10 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { ApiError, InquiryContext, siteApi } from "@/lib/site-api";
 
 interface ConsultationModalProps {
   open: boolean;
-  context?: string | null;
+  context: InquiryContext | null;
   onClose: () => void;
 }
 
@@ -12,24 +14,97 @@ export function ConsultationModal({ open, context, onClose }: ConsultationModalP
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (open && context) setMessage(`I would like to learn more about: ${context}`);
-  }, [open, context]);
+  const inquiryMutation = useMutation({
+    mutationFn: siteApi.submitInquiry,
+    onSuccess: (response) => {
+      toast.success(response.message);
+      resetForm();
+      onClose();
+    },
+    onError: (error) => {
+      if (error instanceof ApiError) {
+        setSubmitError(error.message);
+        setFieldErrors({
+          name: error.fieldErrors?.name?.[0] ?? "",
+          email: error.fieldErrors?.email?.[0] ?? "",
+          message: error.fieldErrors?.message?.[0] ?? "",
+        });
+        return;
+      }
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name || !email) {
-      toast.error("Please share your name and email so we may reach you.");
-      return;
-    }
-    toast.success("Your request has been received.", {
-      description: "An atelier director will write to you within one business day.",
-    });
+      setSubmitError("We could not send your request just now. Please try again.");
+    },
+  });
+
+  const resetForm = useCallback(() => {
     setName("");
     setEmail("");
     setMessage("");
-    onClose();
+    setFieldErrors({});
+    setSubmitError(null);
+    inquiryMutation.reset();
+  }, [inquiryMutation]);
+
+  useEffect(() => {
+    if (!open) {
+      resetForm();
+      return;
+    }
+
+    setFieldErrors({});
+    setSubmitError(null);
+
+    if (!context || context.source === "consultation") {
+      setMessage("");
+      return;
+    }
+
+    if (context.source === "product") {
+      setMessage(`I would like to learn more about: ${context.productName}`);
+      return;
+    }
+
+    setMessage(`I would like to reserve this composition: ${context.configSummary}`);
+  }, [open, context, resetForm]);
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    const trimmedMessage = message.trim();
+    const nextErrors: Record<string, string> = {};
+
+    if (!trimmedName) {
+      nextErrors.name = "Please share your full name.";
+    }
+
+    if (!trimmedEmail) {
+      nextErrors.email = "Please share your email so we may reach you.";
+    }
+
+    if (Object.keys(nextErrors).length > 0) {
+      setFieldErrors(nextErrors);
+      setSubmitError(null);
+      return;
+    }
+
+    setFieldErrors({});
+    setSubmitError(null);
+
+    inquiryMutation.mutate({
+      source: context?.source ?? "consultation",
+      name: trimmedName,
+      email: trimmedEmail,
+      message: trimmedMessage,
+      context: context?.context ?? null,
+      productId: context?.source === "product" ? context.productId : null,
+      productName: context?.source === "product" ? context.productName : null,
+      configSummary: context?.source === "configurator" ? context.configSummary : null,
+      configSelection: context?.source === "configurator" ? context.configSelection : null,
+    });
   };
 
   return (
@@ -58,47 +133,74 @@ export function ConsultationModal({ open, context, onClose }: ConsultationModalP
               Share a few details and we shall arrange a private conversation, in our Milano showroom or by video.
             </p>
 
-            <form onSubmit={submit} className="space-y-5">
+            <form onSubmit={submit} noValidate className="space-y-5">
               <Field label="Full name">
                 <input
                   type="text"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    setFieldErrors((current) => ({ ...current, name: "" }));
+                  }}
                   className="luxury-input"
                   placeholder="Your name"
+                  disabled={inquiryMutation.isPending}
                 />
+                {fieldErrors.name ? <FieldError message={fieldErrors.name} /> : null}
               </Field>
               <Field label="Email">
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setFieldErrors((current) => ({ ...current, email: "" }));
+                  }}
                   className="luxury-input"
                   placeholder="you@maison.com"
+                  disabled={inquiryMutation.isPending}
                 />
+                {fieldErrors.email ? <FieldError message={fieldErrors.email} /> : null}
               </Field>
               <Field label="Message">
                 <textarea
                   value={message}
-                  onChange={(e) => setMessage(e.target.value)}
+                  onChange={(e) => {
+                    setMessage(e.target.value);
+                    setFieldErrors((current) => ({ ...current, message: "" }));
+                  }}
                   rows={3}
                   className="luxury-input resize-none"
                   placeholder="Tell us about the space, the piece, the vision…"
+                  disabled={inquiryMutation.isPending}
                 />
+                {fieldErrors.message ? <FieldError message={fieldErrors.message} /> : null}
               </Field>
 
+              {submitError ? (
+                <p className="text-sm text-red-300/90 font-light">{submitError}</p>
+              ) : null}
+
               <div className="flex items-center justify-between gap-4 pt-4">
-                <button type="button" onClick={onClose} className="text-[10px] tracking-[0.3em] uppercase text-ivory/60 hover:text-ivory transition-colors duration-500">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={inquiryMutation.isPending}
+                  className="text-[10px] tracking-[0.3em] uppercase text-ivory/60 hover:text-ivory transition-colors duration-500 disabled:opacity-50"
+                >
                   Cancel
                 </button>
-                <button type="submit" className="btn-gold">Request Appointment</button>
+                <button type="submit" disabled={inquiryMutation.isPending} className="btn-gold disabled:opacity-70">
+                  {inquiryMutation.isPending ? "Sending..." : "Request Appointment"}
+                </button>
               </div>
             </form>
 
             <button
               onClick={onClose}
-              className="absolute top-5 right-5 w-9 h-9 rounded-full border border-ivory/20 text-ivory/70 hover:text-gold hover:border-gold transition-colors duration-500"
+              className="absolute top-5 right-5 w-9 h-9 rounded-full border border-ivory/20 text-ivory/70 hover:text-gold hover:border-gold transition-colors duration-500 disabled:opacity-50"
               aria-label="Close"
+              disabled={inquiryMutation.isPending}
             >
               ✕
             </button>
@@ -116,4 +218,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       {children}
     </label>
   );
+}
+
+function FieldError({ message }: { message: string }) {
+  return <span className="mt-2 block text-xs text-red-300/90">{message}</span>;
 }

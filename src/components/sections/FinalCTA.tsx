@@ -1,10 +1,12 @@
 import { motion } from "framer-motion";
+import { CtaContent, FooterContent } from "@/lib/site-api";
 
 interface FinalCTAProps {
+  content: CtaContent;
   onConsult: () => void;
 }
 
-export function FinalCTA({ onConsult }: FinalCTAProps) {
+export function FinalCTA({ content, onConsult }: FinalCTAProps) {
   const goCollection = () =>
     document.getElementById("atelier")?.scrollIntoView({ behavior: "smooth" });
 
@@ -27,20 +29,20 @@ export function FinalCTA({ onConsult }: FinalCTAProps) {
         >
           <div className="flex items-center justify-center gap-3 text-[11px] tracking-[0.35em] uppercase text-gold/80 mb-8">
             <span className="w-8 h-px bg-gold/60" />
-            Maison Lumière
+            {content.eyebrow}
             <span className="w-8 h-px bg-gold/60" />
           </div>
           <h2 className="font-serif text-[clamp(3rem,7vw,6.5rem)] leading-[0.95] text-ivory">
-            Bring <span className="italic text-gradient-gold">luxury</span>
-            <br /> into your space.
+            {content.title} <span className="italic text-gradient-gold">{content.accent}</span>
+            <br /> {content.suffix}
           </h2>
           <p className="mt-8 max-w-xl mx-auto text-ivory/60 font-light leading-relaxed">
-            Reserve a private consultation with one of our atelier directors. We will visit, measure, sketch, and craft.
+            {content.description}
           </p>
 
           <div className="mt-12 flex flex-wrap items-center justify-center gap-5">
-            <button onClick={goCollection} className="btn-gold">View Collection</button>
-            <button onClick={onConsult} className="btn-ghost-luxury">Book Consultation</button>
+            <button onClick={goCollection} className="btn-gold">{content.primaryActionLabel}</button>
+            <button onClick={onConsult} className="btn-ghost-luxury">{content.secondaryActionLabel}</button>
           </div>
         </motion.div>
       </div>
@@ -48,39 +50,34 @@ export function FinalCTA({ onConsult }: FinalCTAProps) {
   );
 }
 
-export function Footer({ onConsult }: { onConsult: () => void }) {
+export function Footer({ content, onConsult }: { content: FooterContent; onConsult: () => void }) {
   return (
     <footer className="border-t border-ivory/10 px-8 py-12">
       <div className="mx-auto max-w-[1400px] flex flex-wrap items-center justify-between gap-6">
         <div className="flex items-center gap-3">
-          <span className="font-serif text-xl text-ivory">Maison</span>
-          <span className="font-serif italic text-xl text-gradient-gold">Lumière</span>
+          <span className="font-serif text-xl text-ivory">{content.brand.primary}</span>
+          <span className="font-serif italic text-xl text-gradient-gold">{content.brand.accent}</span>
         </div>
         <div className="text-[10px] tracking-[0.3em] uppercase text-ivory/40">
-          Via della Spiga 14 · 20121 Milano · Italia
+          {content.address}
         </div>
         <div className="flex gap-6 text-[10px] tracking-[0.3em] uppercase text-ivory/50">
-          <button onClick={onConsult} className="hover:text-gold transition-colors duration-500">Contact</button>
-          <a
-            href="https://instagram.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-gold transition-colors duration-500"
-          >
-            Instagram
-          </a>
-          <a
-            href="https://pinterest.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-gold transition-colors duration-500"
-          >
-            Pinterest
-          </a>
+          <button onClick={onConsult} className="hover:text-gold transition-colors duration-500">{content.contactLabel}</button>
+          {content.socials.map((social) => (
+            <a
+              key={social.label}
+              href={social.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-gold transition-colors duration-500"
+            >
+              {social.label}
+            </a>
+          ))}
         </div>
       </div>
       <div className="mx-auto max-w-[1400px] mt-8 text-center text-[10px] tracking-[0.3em] uppercase text-ivory/30">
-        © MMXXVI Maison Lumière · All works signed and numbered
+        {content.copyright}
       </div>
     </footer>
   );

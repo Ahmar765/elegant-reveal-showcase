@@ -1,31 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { RoomsContent } from "@/lib/site-api";
 
-const rooms = [
-  {
-    id: "penthouse",
-    title: "Penthouse Living",
-    location: "Milano · Brera",
-    desc: "Floor-to-ceiling glass framing the Duomo, anchored by the Belluno divano.",
-    img: "https://images.unsplash.com/photo-1618219740975-d40978bb7378?auto=format&fit=crop&w=1800&q=80",
-  },
-  {
-    id: "studio",
-    title: "Minimal Studio",
-    location: "Como · Lake House",
-    desc: "An exercise in restraint — Carrara stone, oak floors, late afternoon light.",
-    img: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1800&q=80",
-  },
-  {
-    id: "office",
-    title: "Executive Lounge",
-    location: "Roma · Palazzo",
-    desc: "Quiet authority. Walnut, brushed brass, and the Aurelia chair in oxblood.",
-    img: "https://images.unsplash.com/photo-1604578762246-41134e37f9cc?auto=format&fit=crop&w=1800&q=80",
-  },
-];
+interface RoomsProps {
+  content: RoomsContent;
+}
 
-export function Rooms() {
+export function Rooms({ content }: RoomsProps) {
   const [active, setActive] = useState(0);
   const [drag, setDrag] = useState({ x: 0, dragging: false, startX: 0 });
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -44,7 +25,7 @@ export function Rooms() {
     return () => el.removeEventListener("mousemove", onMove);
   }, []);
 
-  const room = rooms[active];
+  const room = content.items[active] ?? content.items[0];
 
   return (
     <section id="showroom" className="relative py-32 px-8">
@@ -53,14 +34,14 @@ export function Rooms() {
           <div>
             <div className="flex items-center gap-3 text-[11px] tracking-[0.35em] uppercase text-gold/80 mb-6">
               <span className="w-8 h-px bg-gold/60" />
-              The room experience
+              {content.eyebrow}
             </div>
             <h2 className="font-serif text-[clamp(2.5rem,5vw,4.5rem)] leading-[1] text-ivory max-w-2xl">
-              Curated <span className="italic text-gradient-gold">interiors</span>.
+              {content.title} <span className="italic text-gradient-gold">{content.accent}</span>{content.suffix}
             </h2>
           </div>
           <p className="max-w-sm text-ivory/60 font-light">
-            Drag the canvas. Move your cursor. Step into our private interiors.
+            {content.description}
           </p>
         </div>
 
@@ -90,7 +71,7 @@ export function Rooms() {
                 transition: drag.dragging ? "none" : "transform 0.6s cubic-bezier(0.16,1,0.3,1)",
               }}
             >
-              <img src={room.img} alt={room.title} className="w-full h-full object-cover" />
+              <img src={room.imageUrl} alt={room.title} className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-onyx via-onyx/30 to-transparent" />
               <div className="absolute inset-0 bg-gradient-to-r from-onyx/70 via-transparent to-transparent" />
             </motion.div>
@@ -118,13 +99,13 @@ export function Rooms() {
             >
               <div className="text-[10px] tracking-[0.3em] uppercase text-gold mb-3">{room.location}</div>
               <h3 className="font-serif text-5xl text-ivory mb-3">{room.title}</h3>
-              <p className="text-ivory/75 font-light">{room.desc}</p>
+              <p className="text-ivory/75 font-light">{room.description}</p>
             </motion.div>
           </AnimatePresence>
 
           {/* Room selector */}
           <div className="absolute bottom-10 right-10 flex flex-col gap-3">
-            {rooms.map((r, i) => (
+            {content.items.map((r, i) => (
               <button
                 key={r.id}
                 onClick={() => setActive(i)}

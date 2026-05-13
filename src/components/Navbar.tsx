@@ -1,18 +1,12 @@
 import { motion } from "framer-motion";
+import { NavigationContent } from "@/lib/site-api";
 
 interface NavbarProps {
+  content: NavigationContent;
   onOpenConsult: () => void;
 }
 
-export function Navbar({ onOpenConsult }: NavbarProps) {
-  const items = [
-    { label: "Collection", id: "atelier" },
-    { label: "Materials", id: "materials" },
-    { label: "Showroom", id: "showroom" },
-    { label: "Configure", id: "configure" },
-    { label: "Journal", id: "press" },
-  ];
-
+export function Navbar({ content, onOpenConsult }: NavbarProps) {
   const goTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -29,11 +23,11 @@ export function Navbar({ onOpenConsult }: NavbarProps) {
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           className="flex items-center gap-3 group"
         >
-          <span className="font-serif text-2xl tracking-wide text-ivory">Maison</span>
-          <span className="font-serif italic text-2xl text-gradient-gold">Lumière</span>
+          <span className="font-serif text-2xl tracking-wide text-ivory">{content.brand.primary}</span>
+          <span className="font-serif italic text-2xl text-gradient-gold">{content.brand.accent}</span>
         </button>
         <nav className="hidden md:flex items-center gap-10">
-          {items.map((it) => (
+          {content.items.map((it) => (
             <button
               key={it.id}
               onClick={() => goTo(it.id)}
@@ -47,7 +41,7 @@ export function Navbar({ onOpenConsult }: NavbarProps) {
           onClick={onOpenConsult}
           className="text-[11px] tracking-[0.25em] uppercase text-ivory/85 border border-gold/40 px-5 py-2.5 hover:bg-gold/10 hover:border-gold transition-all duration-700"
         >
-          Book a Visit
+          {content.consultLabel}
         </button>
       </div>
       <div className="hairline mx-8 opacity-40" />

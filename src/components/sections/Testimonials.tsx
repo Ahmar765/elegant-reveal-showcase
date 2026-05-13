@@ -1,44 +1,26 @@
 import { motion } from "framer-motion";
+import { TestimonialsContent } from "@/lib/site-api";
 
-const quotes = [
-  {
-    quote:
-      "Maison Lumière don't make furniture. They compose silence. The Aurelia in my Milano flat has become the room itself.",
-    author: "Elena Rossi",
-    role: "Architect · Studio ER",
-  },
-  {
-    quote:
-      "Every detail is whispered. The brass softens, the leather darkens, and the piece grows more itself each year.",
-    author: "Hiroshi Tanaka",
-    role: "Collector · Tokyo",
-  },
-  {
-    quote:
-      "Few ateliers in Europe still work like this. Hand, eye, time. It is, quite simply, a craft of inheritance.",
-    author: "Charlotte Devereux",
-    role: "Editor · Maison & Objet",
-  },
-];
+interface TestimonialsProps {
+  content: TestimonialsContent;
+}
 
-const press = ["Architectural Digest", "Wallpaper*", "Domus", "Elle Decor", "Monocle"];
-
-export function Testimonials() {
+export function Testimonials({ content }: TestimonialsProps) {
   return (
-    <section className="relative py-32 px-8">
+    <section id="press" className="relative py-32 px-8">
       <div className="mx-auto max-w-[1400px]">
         <div className="text-center mb-20">
           <div className="flex items-center justify-center gap-3 text-[11px] tracking-[0.35em] uppercase text-gold/80 mb-6">
             <span className="w-8 h-px bg-gold/60" />
-            Trusted in private interiors worldwide
+            {content.eyebrow}
             <span className="w-8 h-px bg-gold/60" />
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
-          {quotes.map((q, i) => (
+          {content.items.map((q, i) => (
             <motion.figure
-              key={i}
+              key={q.id}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
@@ -60,12 +42,12 @@ export function Testimonials() {
 
         <div className="hairline opacity-40 mb-10" />
         <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-4">
-          {press.map((p) => (
+          {content.press.map((p) => (
             <span
-              key={p}
+              key={p.id}
               className="font-serif italic text-lg text-ivory/40 hover:text-gold transition-colors duration-700 cursor-default"
             >
-              {p}
+              {p.label}
             </span>
           ))}
         </div>

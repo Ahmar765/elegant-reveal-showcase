@@ -1,35 +1,30 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import oxblood from "@/assets/chair-oxblood.jpg";
-import cognac from "@/assets/chair-cognac.jpg";
-import ivory from "@/assets/chair-ivory.jpg";
-import midnight from "@/assets/chair-midnight.jpg";
-
-const colors = [
-  { id: "oxblood", label: "Oxblood", hex: "#3a1418", img: oxblood },
-  { id: "cognac", label: "Cognac", hex: "#7a4a2a", img: cognac },
-  { id: "ivory", label: "Ivory", hex: "#e8d9bd", img: ivory },
-  { id: "midnight", label: "Midnight", hex: "#15181f", img: midnight },
-];
-const legs = [
-  { id: "brass", label: "Brushed Brass", hex: "#c9a064" },
-  { id: "blackened", label: "Blackened Steel", hex: "#1a1a1a" },
-  { id: "silver", label: "Polished Nickel", hex: "#c0c4c8" },
-];
-const sizes = [
-  { id: "petite", label: "Petite", scale: 0.85 },
-  { id: "signature", label: "Signature", scale: 1 },
-  { id: "grand", label: "Grand", scale: 1.12 },
-];
+import { resolveAsset } from "@/lib/assets";
+import { ConfiguratorColor, ConfiguratorLeg, ConfiguratorOptions, ConfiguratorSize } from "@/lib/site-api";
 
 interface ConfiguratorProps {
-  onReserve: (summary: string) => void;
+  content: ConfiguratorOptions;
+  onReserve: (selection: {
+    summary: string;
+    configSelection: {
+      colorId: string;
+      legId: string;
+      sizeId: string;
+    };
+  }) => void;
 }
 
-export function Configurator({ onReserve }: ConfiguratorProps) {
-  const [color, setColor] = useState(colors[0]);
-  const [leg, setLeg] = useState(legs[0]);
-  const [size, setSize] = useState(sizes[1]);
+export function Configurator({ content, onReserve }: ConfiguratorProps) {
+  const initialColor = content.colors[0];
+  const initialLeg = content.legs[0];
+  const initialSize = content.sizes[1] ?? content.sizes[0];
+  const [color, setColor] = useState<ConfiguratorColor>(initialColor);
+  const [leg, setLeg] = useState<ConfiguratorLeg>(initialLeg);
+  const [size, setSize] = useState<ConfiguratorSize>(initialSize);
+
+  const previewImage = useMemo(() => resolveAsset(color.imageKey), [color.imageKey]);
+  const composedSummary = `Aurelia · ${color.label} leather · ${leg.label} legs · ${size.label}`;
 
   return (
     <section id="configure" className="relative py-32 px-8 bg-onyx">
@@ -37,11 +32,11 @@ export function Configurator({ onReserve }: ConfiguratorProps) {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="flex items-center justify-center gap-3 text-[11px] tracking-[0.35em] uppercase text-gold/80 mb-6">
             <span className="w-8 h-px bg-gold/60" />
-            Bespoke configurator
+            {content.section.eyebrow}
             <span className="w-8 h-px bg-gold/60" />
           </div>
           <h2 className="font-serif text-[clamp(2.5rem,5vw,4.5rem)] leading-[1.05] text-ivory">
-            Compose your <span className="italic text-gradient-gold">Aurelia</span>.
+            {content.section.title} <span className="italic text-gradient-gold">{content.section.accent}</span>.
           </h2>
         </div>
 
@@ -57,7 +52,7 @@ export function Configurator({ onReserve }: ConfiguratorProps) {
             <AnimatePresence mode="wait">
               <motion.img
                 key={color.id}
-                src={color.img}
+                src={previewImage}
                 alt={`Aurelia chair in ${color.label}`}
                 width={1024}
                 height={1024}
@@ -80,7 +75,7 @@ export function Configurator({ onReserve }: ConfiguratorProps) {
               Aurelia · {size.label}
             </div>
             <div className="absolute bottom-6 right-6 text-[10px] tracking-[0.3em] uppercase text-gold/80">
-              Live preview
+              {content.section.previewLabel}
             </div>
             <div
               aria-hidden
@@ -96,7 +91,7 @@ export function Configurator({ onReserve }: ConfiguratorProps) {
           <div className="lg:col-span-5 space-y-10">
             <Group label="Leather">
               <div className="grid grid-cols-4 gap-3">
-                {colors.map((c) => (
+                {content.colors.map((c) => (
                   <Swatch key={c.id} active={color.id === c.id} hex={c.hex} label={c.label} onClick={() => setColor(c)} />
                 ))}
               </div>
@@ -104,7 +99,7 @@ export function Configurator({ onReserve }: ConfiguratorProps) {
 
             <Group label="Leg Finish">
               <div className="grid grid-cols-3 gap-3">
-                {legs.map((l) => (
+                {content.legs.map((l) => (
                   <Swatch key={l.id} active={leg.id === l.id} hex={l.hex} label={l.label} onClick={() => setLeg(l)} />
                 ))}
               </div>
@@ -112,7 +107,7 @@ export function Configurator({ onReserve }: ConfiguratorProps) {
 
             <Group label="Proportion">
               <div className="grid grid-cols-3 gap-3">
-                {sizes.map((s) => (
+                {content.sizes.map((s) => (
                   <button
                     key={s.id}
                     onClick={() => setSize(s)}
@@ -133,15 +128,22 @@ export function Configurator({ onReserve }: ConfiguratorProps) {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-[10px] tracking-[0.3em] uppercase text-ivory/50 mb-1">From</div>
-                <div className="font-serif text-3xl text-ivory">€ {(8400 * size.scale).toFixed(0)}</div>
+                <div className="font-serif text-3xl text-ivory">€ {(content.section.basePrice * size.scale).toFixed(0)}</div>
               </div>
               <button
                 onClick={() =>
-                  onReserve(`Aurelia · ${color.label} leather · ${leg.label} legs · ${size.label}`)
+                  onReserve({
+                    summary: composedSummary,
+                    configSelection: {
+                      colorId: color.id,
+                      legId: leg.id,
+                      sizeId: size.id,
+                    },
+                  })
                 }
                 className="btn-gold"
               >
-                Reserve Yours
+                {content.section.reserveLabel}
               </button>
             </div>
           </div>

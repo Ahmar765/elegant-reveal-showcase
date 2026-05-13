@@ -1,24 +1,16 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import productChair from "@/assets/product-chair.jpg";
-import productSofa from "@/assets/product-sofa.jpg";
-import productTable from "@/assets/product-table.jpg";
-import productLamp from "@/assets/product-lamp.jpg";
-
-const products = [
-  { id: "chair", name: "Aurelia Lounge", category: "Seating", price: "€ 8,400", img: productChair, year: "MMXXVI" },
-  { id: "sofa", name: "Belluno Divano", category: "Sofa", price: "€ 24,900", img: productSofa, year: "MMXXVI" },
-  { id: "table", name: "Carrara Orbis", category: "Table", price: "€ 12,200", img: productTable, year: "MMXXV" },
-  { id: "lamp", name: "Sole d'Oro", category: "Lighting", price: "€ 4,750", img: productLamp, year: "MMXXVI" },
-];
+import { resolveAsset } from "@/lib/assets";
+import { GalleryContent, Product } from "@/lib/site-api";
 
 interface GalleryProps {
-  onRequest: (productName: string) => void;
+  content: GalleryContent;
+  products: Product[];
+  onRequest: (product: Product) => void;
 }
 
-export function Gallery({ onRequest }: GalleryProps) {
-  const [hovered, setHovered] = useState<string | null>(null);
-  const [open, setOpen] = useState<typeof products[0] | null>(null);
+export function Gallery({ content, products, onRequest }: GalleryProps) {
+  const [open, setOpen] = useState<Product | null>(null);
 
   const handleTilt = (e: React.MouseEvent<HTMLDivElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
@@ -41,14 +33,14 @@ export function Gallery({ onRequest }: GalleryProps) {
           <div>
             <div className="flex items-center gap-3 text-[11px] tracking-[0.35em] uppercase text-gold/80 mb-6">
               <span className="w-8 h-px bg-gold/60" />
-              Signature pieces
+              {content.eyebrow}
             </div>
             <h2 className="font-serif text-[clamp(2.5rem,5vw,4.5rem)] leading-[1] tracking-tight text-ivory max-w-2xl">
-              The <span className="italic text-gradient-gold">Atelier</span> Selection.
+              {content.title} <span className="italic text-gradient-gold">{content.accent}</span> {content.suffix}
             </h2>
           </div>
           <p className="max-w-sm text-ivory/60 font-light leading-relaxed">
-            Each piece is composed by a single master craftsman, signed and numbered. Hover to bring it to light.
+            {content.description}
           </p>
         </div>
 
@@ -65,8 +57,6 @@ export function Gallery({ onRequest }: GalleryProps) {
               <button
                 type="button"
                 onClick={() => setOpen(p)}
-                onMouseEnter={() => setHovered(p.id)}
-                onMouseLeave={() => setHovered(null)}
                 className="block w-full text-left"
               >
                 <div
@@ -77,7 +67,7 @@ export function Gallery({ onRequest }: GalleryProps) {
                 >
                   <img
                     data-tilt
-                    src={p.img}
+                    src={resolveAsset(p.imageKey)}
                     alt={`${p.name} — ${p.category}`}
                     width={1024}
                     height={1024}
@@ -105,7 +95,7 @@ export function Gallery({ onRequest }: GalleryProps) {
 
                   {/* Hover quick-view chip */}
                   <div className="absolute bottom-5 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-500 text-[10px] tracking-[0.3em] uppercase text-onyx bg-gold px-4 py-2">
-                    Quick View
+                    {content.quickViewLabel}
                   </div>
                 </div>
 
@@ -116,7 +106,7 @@ export function Gallery({ onRequest }: GalleryProps) {
                       {p.name}
                     </div>
                   </div>
-                  <div className="text-sm text-ivory/70 font-light">{p.price}</div>
+                  <div className="text-sm text-ivory/70 font-light">{p.priceLabel}</div>
                 </div>
               </button>
             </motion.div>
@@ -142,7 +132,7 @@ export function Gallery({ onRequest }: GalleryProps) {
               className="relative w-full max-w-5xl glass-panel rounded-sm overflow-hidden grid md:grid-cols-2"
             >
               <div className="h-[480px] relative bg-onyx">
-                <img src={open.img} alt={open.name} className="w-full h-full object-cover" />
+                <img src={resolveAsset(open.imageKey)} alt={open.name} className="w-full h-full object-cover" />
               </div>
               <div className="p-12 flex flex-col justify-between">
                 <div>
@@ -151,29 +141,28 @@ export function Gallery({ onRequest }: GalleryProps) {
                   </div>
                   <h3 className="font-serif text-5xl text-ivory mb-6">{open.name}</h3>
                   <p className="text-ivory/65 leading-relaxed font-light">
-                    Hand-stitched in our Milanese atelier across 84 hours. The {open.name.toLowerCase()} explores the
-                    silent dialogue between brushed brass, Tuscan leather and quiet geometry.
+                    {open.description}
                   </p>
                   <div className="hairline mt-8 mb-8 opacity-50" />
                   <dl className="grid grid-cols-2 gap-y-3 text-sm">
                     <dt className="text-ivory/50 uppercase tracking-widest text-[10px]">Materials</dt>
-                    <dd className="text-ivory/85">Italian leather · Brass</dd>
+                    <dd className="text-ivory/85">{open.materials}</dd>
                     <dt className="text-ivory/50 uppercase tracking-widest text-[10px]">Lead time</dt>
-                    <dd className="text-ivory/85">10 — 12 weeks</dd>
+                    <dd className="text-ivory/85">{open.leadTime}</dd>
                     <dt className="text-ivory/50 uppercase tracking-widest text-[10px]">Edition</dt>
-                    <dd className="text-ivory/85">Numbered, /99</dd>
+                    <dd className="text-ivory/85">{open.edition}</dd>
                   </dl>
                 </div>
                 <div className="mt-8 flex items-center justify-between gap-4">
-                  <div className="font-serif text-3xl text-ivory">{open.price}</div>
+                  <div className="font-serif text-3xl text-ivory">{open.priceLabel}</div>
                   <button
                     onClick={() => {
-                      onRequest(open.name);
+                      onRequest(open);
                       setOpen(null);
                     }}
                     className="btn-gold"
                   >
-                    Request Piece
+                    {content.requestLabel}
                   </button>
                 </div>
               </div>
