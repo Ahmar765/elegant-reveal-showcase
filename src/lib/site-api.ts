@@ -185,19 +185,21 @@ export class ApiError extends Error {
 const strip = <T extends { sortOrder?: number }>(arr: readonly T[]): Omit<T, "sortOrder">[] =>
   arr.map(({ sortOrder: _s, ...rest }) => rest as Omit<T, "sortOrder">);
 
+const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
+
 const siteContent: SiteContent = {
-  navigation: siteSections.navigation,
-  hero: siteSections.hero as HeroContent,
-  gallery: siteSections.gallery,
-  materials: { ...siteSections.materials, items: strip(materialsSeed) as MaterialItem[] },
-  rooms: { ...siteSections.rooms, items: strip(roomsSeed) as RoomItem[] },
+  navigation: clone(siteSections.navigation) as NavigationContent,
+  hero: clone(siteSections.hero) as HeroContent,
+  gallery: clone(siteSections.gallery) as GalleryContent,
+  materials: { ...clone(siteSections.materials), items: strip(materialsSeed) as MaterialItem[] },
+  rooms: { ...clone(siteSections.rooms), items: strip(roomsSeed) as RoomItem[] },
   testimonials: {
-    ...siteSections.testimonials,
+    ...clone(siteSections.testimonials),
     items: strip(testimonialsSeed) as TestimonialItem[],
     press: strip(pressMentions) as PressMention[],
   },
-  cta: siteSections.cta,
-  footer: { ...siteSections.footer, socials: [...siteSections.footer.socials] },
+  cta: clone(siteSections.cta) as CtaContent,
+  footer: clone(siteSections.footer) as FooterContent,
 };
 
 const productsList: Product[] = strip(productsSeed) as Product[];
