@@ -205,7 +205,7 @@ const siteContent: SiteContent = {
 const productsList: Product[] = strip(productsSeed) as Product[];
 
 const configuratorOptions: ConfiguratorOptions = {
-  section: configuratorSeed.section,
+  section: clone(configuratorSeed.section) as ConfiguratorSection,
   colors: strip(configuratorSeed.colors) as ConfiguratorColor[],
   legs: strip(configuratorSeed.legs) as ConfiguratorLeg[],
   sizes: strip(configuratorSeed.sizes) as ConfiguratorSize[],
