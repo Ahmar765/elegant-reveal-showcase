@@ -185,16 +185,16 @@ export class ApiError extends Error {
 const strip = <T extends { sortOrder?: number }>(arr: readonly T[]): Omit<T, "sortOrder">[] =>
   arr.map(({ sortOrder: _s, ...rest }) => rest as Omit<T, "sortOrder">);
 
-const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
+const clone = (value: unknown): unknown => JSON.parse(JSON.stringify(value));
 
 const siteContent: SiteContent = {
   navigation: clone(siteSections.navigation) as NavigationContent,
   hero: clone(siteSections.hero) as HeroContent,
   gallery: clone(siteSections.gallery) as GalleryContent,
-  materials: { ...clone(siteSections.materials), items: strip(materialsSeed) as MaterialItem[] },
-  rooms: { ...clone(siteSections.rooms), items: strip(roomsSeed) as RoomItem[] },
+  materials: { ...(clone(siteSections.materials) as MaterialsContent), items: strip(materialsSeed) as MaterialItem[] },
+  rooms: { ...(clone(siteSections.rooms) as RoomsContent), items: strip(roomsSeed) as RoomItem[] },
   testimonials: {
-    ...clone(siteSections.testimonials),
+    ...(clone(siteSections.testimonials) as TestimonialsContent),
     items: strip(testimonialsSeed) as TestimonialItem[],
     press: strip(pressMentions) as PressMention[],
   },
