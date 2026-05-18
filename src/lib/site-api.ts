@@ -1,21 +1,22 @@
-export type NavItem = {
-  label: string;
-  id: string;
-};
+import {
+  configurator as configuratorSeed,
+  materials as materialsSeed,
+  pressMentions,
+  products as productsSeed,
+  rooms as roomsSeed,
+  siteSections,
+  testimonials as testimonialsSeed,
+} from "../../server/src/seedData";
+
+export type NavItem = { label: string; id: string };
 
 export type NavigationContent = {
-  brand: {
-    primary: string;
-    accent: string;
-  };
+  brand: { primary: string; accent: string };
   items: NavItem[];
   consultLabel: string;
 };
 
-export type HeroStat = {
-  value: string;
-  label: string;
-};
+export type HeroStat = { value: string; label: string };
 
 export type HeroContent = {
   eyebrow: string;
@@ -89,17 +90,8 @@ export type RoomsContent = {
   items: RoomItem[];
 };
 
-export type TestimonialItem = {
-  id: string;
-  quote: string;
-  author: string;
-  role: string;
-};
-
-export type PressMention = {
-  id: string;
-  label: string;
-};
+export type TestimonialItem = { id: string; quote: string; author: string; role: string };
+export type PressMention = { id: string; label: string };
 
 export type TestimonialsContent = {
   eyebrow: string;
@@ -118,10 +110,7 @@ export type CtaContent = {
 };
 
 export type FooterContent = {
-  brand: {
-    primary: string;
-    accent: string;
-  };
+  brand: { primary: string; accent: string };
   address: string;
   socials: { label: string; url: string }[];
   contactLabel: string;
@@ -148,24 +137,9 @@ export type ConfiguratorSection = {
   basePrice: number;
 };
 
-export type ConfiguratorColor = {
-  id: string;
-  label: string;
-  hex: string;
-  imageKey: string;
-};
-
-export type ConfiguratorLeg = {
-  id: string;
-  label: string;
-  hex: string;
-};
-
-export type ConfiguratorSize = {
-  id: string;
-  label: string;
-  scale: number;
-};
+export type ConfiguratorColor = { id: string; label: string; hex: string; imageKey: string };
+export type ConfiguratorLeg = { id: string; label: string; hex: string };
+export type ConfiguratorSize = { id: string; label: string; scale: number };
 
 export type ConfiguratorOptions = {
   section: ConfiguratorSection;
@@ -175,25 +149,13 @@ export type ConfiguratorOptions = {
 };
 
 export type InquiryContext =
-  | {
-      source: "consultation";
-      context?: null;
-    }
-  | {
-      source: "product";
-      context: string;
-      productId: string;
-      productName: string;
-    }
+  | { source: "consultation"; context?: null }
+  | { source: "product"; context: string; productId: string; productName: string }
   | {
       source: "configurator";
       context: string;
       configSummary: string;
-      configSelection: {
-        colorId: string;
-        legId: string;
-        sizeId: string;
-      };
+      configSelection: { colorId: string; legId: string; sizeId: string };
     };
 
 export type InquiryPayload = {
@@ -205,63 +167,58 @@ export type InquiryPayload = {
   productId?: string | null;
   productName?: string | null;
   configSummary?: string | null;
-  configSelection?: {
-    colorId: string;
-    legId: string;
-    sizeId: string;
-  } | null;
+  configSelection?: { colorId: string; legId: string; sizeId: string } | null;
 };
 
-export type InquiryResponse = {
-  id: number;
-  message: string;
-};
-
-type ApiFieldErrors = Record<string, string[] | undefined>;
-
-type ApiErrorPayload = {
-  message?: string;
-  fieldErrors?: ApiFieldErrors;
-};
+export type InquiryResponse = { id: number; message: string };
 
 export class ApiError extends Error {
   status: number;
-  fieldErrors?: ApiFieldErrors;
-
-  constructor(status: number, payload: ApiErrorPayload) {
-    super(payload.message ?? "Something went wrong while processing the request.");
+  fieldErrors?: Record<string, string[] | undefined>;
+  constructor(status: number, message: string) {
+    super(message);
     this.name = "ApiError";
     this.status = status;
-    this.fieldErrors = payload.fieldErrors;
   }
 }
 
-async function fetchJson<T>(input: RequestInfo | URL, init?: RequestInit): Promise<T> {
-  const response = await fetch(input, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(init?.headers ?? {}),
-    },
-    ...init,
-  });
+const strip = <T extends { sortOrder?: number }>(arr: readonly T[]): Omit<T, "sortOrder">[] =>
+  arr.map(({ sortOrder: _s, ...rest }) => rest as Omit<T, "sortOrder">);
 
-  const isJson = response.headers.get("content-type")?.includes("application/json");
-  const payload = isJson ? ((await response.json()) as T | ApiErrorPayload) : null;
+const siteContent: SiteContent = {
+  navigation: siteSections.navigation,
+  hero: siteSections.hero as HeroContent,
+  gallery: siteSections.gallery,
+  materials: { ...siteSections.materials, items: strip(materialsSeed) as MaterialItem[] },
+  rooms: { ...siteSections.rooms, items: strip(roomsSeed) as RoomItem[] },
+  testimonials: {
+    ...siteSections.testimonials,
+    items: strip(testimonialsSeed) as TestimonialItem[],
+    press: strip(pressMentions) as PressMention[],
+  },
+  cta: siteSections.cta,
+  footer: { ...siteSections.footer, socials: [...siteSections.footer.socials] },
+};
 
-  if (!response.ok) {
-    throw new ApiError(response.status, (payload as ApiErrorPayload) ?? {});
-  }
+const productsList: Product[] = strip(productsSeed) as Product[];
 
-  return payload as T;
-}
+const configuratorOptions: ConfiguratorOptions = {
+  section: configuratorSeed.section,
+  colors: strip(configuratorSeed.colors) as ConfiguratorColor[],
+  legs: strip(configuratorSeed.legs) as ConfiguratorLeg[],
+  sizes: strip(configuratorSeed.sizes) as ConfiguratorSize[],
+};
+
+const wait = <T>(value: T) => Promise.resolve(value);
 
 export const siteApi = {
-  getSiteContent: () => fetchJson<SiteContent>("/api/content/site"),
-  getProducts: () => fetchJson<Product[]>("/api/products"),
-  getConfiguratorOptions: () => fetchJson<ConfiguratorOptions>("/api/configurator/options"),
-  submitInquiry: (payload: InquiryPayload) =>
-    fetchJson<InquiryResponse>("/api/inquiries", {
-      method: "POST",
-      body: JSON.stringify(payload),
+  getSiteContent: () => wait(siteContent),
+  getProducts: () => wait(productsList),
+  getConfiguratorOptions: () => wait(configuratorOptions),
+  submitInquiry: (_payload: InquiryPayload): Promise<InquiryResponse> =>
+    wait({
+      id: Date.now(),
+      message:
+        "Your request has been received. An atelier director will write to you within one business day.",
     }),
 };
