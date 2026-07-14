@@ -25,7 +25,7 @@ export function Testimonials({ content }: TestimonialsProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 1, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
-              className="relative glass-panel rounded-sm p-10 lift-on-hover animate-float-soft"
+              className="relative glass-panel rounded-sm p-6 sm:p-8 md:p-10 lift-on-hover animate-float-soft"
               style={{ animationDelay: `${i * 1.2}s` }}
             >
               <div className="font-serif text-6xl text-gold/60 leading-none mb-4">"</div>
