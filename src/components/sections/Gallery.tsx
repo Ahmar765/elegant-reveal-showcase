@@ -27,7 +27,7 @@ export function Gallery({ content, products, onRequest }: GalleryProps) {
   };
 
   return (
-    <section id="atelier" className="relative py-32 px-8">
+    <section id="atelier" className="relative py-20 sm:py-32 px-5 sm:px-8">
       <div className="mx-auto max-w-[1400px]">
         <div className="flex items-end justify-between gap-8 mb-20 flex-wrap">
           <div>
