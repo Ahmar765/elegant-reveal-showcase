@@ -47,7 +47,7 @@ export function Rooms({ content }: RoomsProps) {
 
         <div
           ref={wrapRef}
-          className="relative h-[640px] rounded-sm overflow-hidden glass-panel cursor-grab active:cursor-grabbing select-none"
+          className="relative h-[460px] sm:h-[560px] lg:h-[640px] rounded-sm overflow-hidden glass-panel cursor-grab active:cursor-grabbing select-none"
           onMouseDown={(e) => setDrag({ x: drag.x, dragging: true, startX: e.clientX - drag.x })}
           onMouseUp={() => setDrag((d) => ({ ...d, dragging: false }))}
           onMouseLeave={() => setDrag((d) => ({ ...d, dragging: false }))}
