@@ -28,7 +28,7 @@ export function Rooms({ content }: RoomsProps) {
   const room = content.items[active] ?? content.items[0];
 
   return (
-    <section id="showroom" className="relative py-32 px-8">
+    <section id="showroom" className="relative py-20 sm:py-32 px-5 sm:px-8">
       <div className="mx-auto max-w-[1400px]">
         <div className="flex items-end justify-between gap-8 mb-16 flex-wrap">
           <div>
