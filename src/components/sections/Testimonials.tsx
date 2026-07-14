@@ -7,7 +7,7 @@ interface TestimonialsProps {
 
 export function Testimonials({ content }: TestimonialsProps) {
   return (
-    <section id="press" className="relative py-32 px-8">
+    <section id="press" className="relative py-20 sm:py-32 px-5 sm:px-8">
       <div className="mx-auto max-w-[1400px]">
         <div className="text-center mb-20">
           <div className="flex items-center justify-center gap-3 text-[11px] tracking-[0.35em] uppercase text-gold/80 mb-6">
