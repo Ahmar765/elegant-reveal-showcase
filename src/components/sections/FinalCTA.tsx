@@ -11,7 +11,7 @@ export function FinalCTA({ content, onConsult }: FinalCTAProps) {
     document.getElementById("atelier")?.scrollIntoView({ behavior: "smooth" });
 
   return (
-    <section id="contact" className="relative py-40 px-8 overflow-hidden">
+    <section id="contact" className="relative py-24 sm:py-40 px-5 sm:px-8 overflow-hidden">
       <div
         aria-hidden
         className="absolute inset-0 -z-10"
