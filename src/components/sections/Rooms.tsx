@@ -28,7 +28,7 @@ export function Rooms({ content }: RoomsProps) {
   const room = content.items[active] ?? content.items[0];
 
   return (
-    <section id="showroom" className="relative py-32 px-8">
+    <section id="showroom" className="relative py-20 sm:py-32 px-5 sm:px-8">
       <div className="mx-auto max-w-[1400px]">
         <div className="flex items-end justify-between gap-8 mb-16 flex-wrap">
           <div>
@@ -47,7 +47,7 @@ export function Rooms({ content }: RoomsProps) {
 
         <div
           ref={wrapRef}
-          className="relative h-[640px] rounded-sm overflow-hidden glass-panel cursor-grab active:cursor-grabbing select-none"
+          className="relative h-[460px] sm:h-[560px] lg:h-[640px] rounded-sm overflow-hidden glass-panel cursor-grab active:cursor-grabbing select-none"
           onMouseDown={(e) => setDrag({ x: drag.x, dragging: true, startX: e.clientX - drag.x })}
           onMouseUp={() => setDrag((d) => ({ ...d, dragging: false }))}
           onMouseLeave={() => setDrag((d) => ({ ...d, dragging: false }))}
@@ -95,16 +95,16 @@ export function Rooms({ content }: RoomsProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute bottom-10 left-10 max-w-md"
+              className="absolute bottom-6 left-5 right-5 sm:bottom-10 sm:left-10 sm:right-auto sm:max-w-md"
             >
               <div className="text-[10px] tracking-[0.3em] uppercase text-gold mb-3">{room.location}</div>
-              <h3 className="font-serif text-5xl text-ivory mb-3">{room.title}</h3>
-              <p className="text-ivory/75 font-light">{room.description}</p>
+              <h3 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-ivory mb-3">{room.title}</h3>
+              <p className="text-ivory/75 font-light text-sm sm:text-base">{room.description}</p>
             </motion.div>
           </AnimatePresence>
 
           {/* Room selector */}
-          <div className="absolute bottom-10 right-10 flex flex-col gap-3">
+          <div className="absolute top-5 right-5 sm:top-auto sm:bottom-10 sm:right-10 flex flex-col gap-2 sm:gap-3 items-end">
             {content.items.map((r, i) => (
               <button
                 key={r.id}

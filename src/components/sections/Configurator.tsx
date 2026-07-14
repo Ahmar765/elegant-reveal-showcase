@@ -27,7 +27,7 @@ export function Configurator({ content, onReserve }: ConfiguratorProps) {
   const composedSummary = `Aurelia · ${color.label} leather · ${leg.label} legs · ${size.label}`;
 
   return (
-    <section id="configure" className="relative py-32 px-8 bg-onyx">
+    <section id="configure" className="relative py-20 sm:py-32 px-5 sm:px-8 bg-onyx">
       <div className="mx-auto max-w-[1400px]">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="flex items-center justify-center gap-3 text-[11px] tracking-[0.35em] uppercase text-gold/80 mb-6">
@@ -47,7 +47,7 @@ export function Configurator({ content, onReserve }: ConfiguratorProps) {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 1.2 }}
-            className="lg:col-span-7 h-[600px] glass-panel rounded-sm relative overflow-hidden flex items-center justify-center"
+            className="lg:col-span-7 h-[380px] sm:h-[500px] lg:h-[600px] glass-panel rounded-sm relative overflow-hidden flex items-center justify-center"
           >
             <AnimatePresence mode="wait">
               <motion.img

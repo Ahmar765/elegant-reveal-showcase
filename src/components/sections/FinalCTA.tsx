@@ -11,7 +11,7 @@ export function FinalCTA({ content, onConsult }: FinalCTAProps) {
     document.getElementById("atelier")?.scrollIntoView({ behavior: "smooth" });
 
   return (
-    <section id="contact" className="relative py-40 px-8 overflow-hidden">
+    <section id="contact" className="relative py-24 sm:py-40 px-5 sm:px-8 overflow-hidden">
       <div
         aria-hidden
         className="absolute inset-0 -z-10"
@@ -52,8 +52,8 @@ export function FinalCTA({ content, onConsult }: FinalCTAProps) {
 
 export function Footer({ content, onConsult }: { content: FooterContent; onConsult: () => void }) {
   return (
-    <footer className="border-t border-ivory/10 px-8 py-12">
-      <div className="mx-auto max-w-[1400px] flex flex-wrap items-center justify-between gap-6">
+    <footer className="border-t border-ivory/10 px-5 sm:px-8 py-10 sm:py-12">
+      <div className="mx-auto max-w-[1400px] flex flex-wrap items-center justify-between gap-4 sm:gap-6 text-center sm:text-left">
         <div className="flex items-center gap-3">
           <span className="font-serif text-xl text-ivory">{content.brand.primary}</span>
           <span className="font-serif italic text-xl text-gradient-gold">{content.brand.accent}</span>
