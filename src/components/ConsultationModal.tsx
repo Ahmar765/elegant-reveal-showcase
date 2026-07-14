@@ -39,18 +39,24 @@ export function ConsultationModal({ open, context, onClose }: ConsultationModalP
     },
   });
 
+  const mutationReset = inquiryMutation.reset;
   const resetForm = useCallback(() => {
     setName("");
     setEmail("");
     setMessage("");
     setFieldErrors({});
     setSubmitError(null);
-    inquiryMutation.reset();
-  }, [inquiryMutation]);
+    mutationReset();
+  }, [mutationReset]);
 
   useEffect(() => {
     if (!open) {
-      resetForm();
+      setName("");
+      setEmail("");
+      setMessage("");
+      setFieldErrors({});
+      setSubmitError(null);
+      mutationReset();
       return;
     }
 
@@ -68,7 +74,7 @@ export function ConsultationModal({ open, context, onClose }: ConsultationModalP
     }
 
     setMessage(`I would like to reserve this composition: ${context.configSummary}`);
-  }, [open, context, resetForm]);
+  }, [open, context, mutationReset]);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
