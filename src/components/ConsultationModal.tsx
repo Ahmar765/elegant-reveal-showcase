@@ -120,7 +120,7 @@ export function ConsultationModal({ open, context, onClose }: ConsultationModalP
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-onyx/85 backdrop-blur-md"
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 bg-onyx/85 backdrop-blur-md overflow-y-auto"
           onClick={onClose}
         >
           <motion.div
@@ -129,7 +129,7 @@ export function ConsultationModal({ open, context, onClose }: ConsultationModalP
             exit={{ y: 40, opacity: 0, scale: 0.97 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-2xl glass-panel rounded-sm overflow-hidden p-12"
+            className="relative w-full max-w-2xl glass-panel rounded-sm overflow-hidden p-6 sm:p-10 md:p-12 my-8"
           >
             <div className="text-[10px] tracking-[0.35em] uppercase text-gold mb-4">Private consultation</div>
             <h3 className="font-serif text-4xl text-ivory mb-3">
