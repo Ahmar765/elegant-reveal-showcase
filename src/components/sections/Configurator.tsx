@@ -47,7 +47,7 @@ export function Configurator({ content, onReserve }: ConfiguratorProps) {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 1.2 }}
-            className="lg:col-span-7 h-[600px] glass-panel rounded-sm relative overflow-hidden flex items-center justify-center"
+            className="lg:col-span-7 h-[380px] sm:h-[500px] lg:h-[600px] glass-panel rounded-sm relative overflow-hidden flex items-center justify-center"
           >
             <AnimatePresence mode="wait">
               <motion.img
