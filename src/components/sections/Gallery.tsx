@@ -130,17 +130,17 @@ export function Gallery({ content, products, onRequest }: GalleryProps) {
               exit={{ y: 40, opacity: 0, scale: 0.97 }}
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-5xl glass-panel rounded-sm overflow-hidden grid md:grid-cols-2"
+              className="relative w-full max-w-5xl glass-panel rounded-sm overflow-hidden grid md:grid-cols-2 my-8"
             >
-              <div className="h-[480px] relative bg-onyx">
+              <div className="h-64 sm:h-80 md:h-[480px] relative bg-onyx">
                 <img src={resolveAsset(open.imageKey)} alt={open.name} className="w-full h-full object-cover" />
               </div>
-              <div className="p-12 flex flex-col justify-between">
+              <div className="p-6 sm:p-8 md:p-12 flex flex-col justify-between">
                 <div>
                   <div className="text-[10px] tracking-[0.3em] uppercase text-gold mb-4">
                     {open.category} · {open.year}
                   </div>
-                  <h3 className="font-serif text-5xl text-ivory mb-6">{open.name}</h3>
+                  <h3 className="font-serif text-3xl sm:text-4xl md:text-5xl text-ivory mb-4 sm:mb-6">{open.name}</h3>
                   <p className="text-ivory/65 leading-relaxed font-light">
                     {open.description}
                   </p>
